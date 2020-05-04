@@ -5,8 +5,6 @@
 ## Table of Contents
 
 * [Why Docker](#why-docker)
-* [Prerequisites](#prerequisites)
-* [Installation](#installation)
 * [Containers](#containers)
 * [Images](#images)
 * [Networks](#networks)
@@ -69,14 +67,15 @@ docker <command> <subcommand> --options.
 
 [Your basic isolated Docker process](http://etherealmind.com/basics-docker-containers-hypervisors-coreos/). Containers are to Virtual Machines as threads are to processes. Or you can think of them as chroots on steroids.container run images as process. image is some application binary.
 
-* Process of container intialization:
-* look for image in cache
-* look for image on dockerhub
-* download the image
-* creates new container
-* give container virtual IP on private network
-* open up desired port on host and routes all traffic on that port to desired port in container
-* starts container 
+##  Process of container intialization:
+
+    * look for image in cache
+    * look for image on dockerhub
+    * download the image
+    * creates new container
+    * give container virtual IP on private network
+    * open up desired port on host and routes all traffic on that port to desired port in container
+    * starts container 
 
 ### Lifecycle
 
@@ -712,6 +711,7 @@ docker rm -v $(docker ps -a -q -f status=exited)
 ```
 
 ### Delete containers after stopping
+    * To delete a container it must be stopped first.
 
 ```
 docker stop $(docker ps -aq) && docker rm -v $(docker ps -aq)
