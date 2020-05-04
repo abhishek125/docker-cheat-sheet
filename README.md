@@ -30,37 +30,6 @@ Developers can get going quickly by starting with one of the 13,000+ apps availa
 
 Docker helps developers build and ship higher-quality applications, faster." -- [What is Docker](https://www.docker.com/what-docker#copy1)
 
-## Prerequisites
-
-I use [Oh My Zsh](https://github.com/robbyrussell/oh-my-zsh) with the [Docker plugin](https://github.com/robbyrussell/oh-my-zsh/wiki/Plugins#docker) for autocompletion of docker commands. YMMV.
-
-### Linux
-
-The 3.10.x kernel is [the minimum requirement](https://docs.docker.com/engine/installation/binaries/#check-kernel-dependencies) for Docker.
-
-### MacOS
-
-10.8 “Mountain Lion” or newer is required.
-
-## Installation
-
-### Linux
-
-Quick and easy install script provided by Docker:
-
-```
-curl -sSL https://get.docker.com/ | sh
-```
-
-If you're not willing to run a random shell script, please see the [installation](https://docs.docker.com/engine/installation/linux/) instructions for your distribution.
-
-If you are a complete Docker newbie, you should follow the [series of tutorials](https://docs.docker.com/engine/getstarted/) now.
-
-### macOS
-
-Download and install [Docker Community Edition](https://www.docker.com/community-edition). if you have Homebrew-Cask, just type `brew cask install docker`. Or Download and install [Docker Toolbox](https://docs.docker.com/toolbox/overview/).  [Docker For Mac](https://docs.docker.com/docker-for-mac/) is nice, but it's not quite as finished as the VirtualBox install.  [See the comparison](https://docs.docker.com/docker-for-mac/docker-toolbox/).
-
-> **NOTE** Docker Toolbox is legacy. You should to use Docker Community Edition, See [Docker Toolbox](https://docs.docker.com/toolbox/overview/).
 
 Once you've installed Docker Community Edition, click the docker icon in Launchpad. Then start up a container:
 
@@ -70,7 +39,6 @@ docker run hello-world
 
 That's it, you have a running Docker container.
 
-If you are a complete Docker newbie, you should probably follow the [series of tutorials](https://docs.docker.com/engine/getstarted/) now.
 
 ### Check Version
 
@@ -93,10 +61,22 @@ $ docker version --format '{{json .}}'
 
 {"Client":{"Version":"1.8.0","ApiVersion":"1.20","GitCommit":"f5bae0a","GoVersion":"go1.4.2","Os":"linux","Arch":"am"}
 ```
+## Docker command format: 
+
+docker <command> <subcommand> --options.
 
 ## Containers
 
-[Your basic isolated Docker process](http://etherealmind.com/basics-docker-containers-hypervisors-coreos/). Containers are to Virtual Machines as threads are to processes. Or you can think of them as chroots on steroids.
+[Your basic isolated Docker process](http://etherealmind.com/basics-docker-containers-hypervisors-coreos/). Containers are to Virtual Machines as threads are to processes. Or you can think of them as chroots on steroids.container run images as process. image is some application binary.
+
+* Process of container intialization:
+* look for image in cache
+* look for image on dockerhub
+* download the image
+* creates new container
+* give container virtual IP on private network
+* open up desired port on host and routes all traffic on that port to desired port in container
+* starts container 
 
 ### Lifecycle
 
@@ -267,7 +247,7 @@ Importing a container as an image using the `import` command creates a new image
 
 ## Networks
 
-Docker has a [networks](https://docs.docker.com/engine/userguide/networking/) feature. Not much is known about it, so this is a good place to expand the cheat sheet. There is a note saying that it's a good way to configure docker containers to talk to each other without using ports. See [working with networks](https://docs.docker.com/engine/userguide/networking/work-with-networks/) for more details.
+Docker has a [networks](https://docs.docker.com/engine/userguide/networking/) feature. Not much is known about it, so this is a good place to expand the cheat sheet. There is a note saying that it's a good way to configure docker containers to talk to each other without using ports. See [working with networks](https://docs.docker.com/engine/userguide/networking/work-with-networks/) for more details.We should put containers which require intercommunication inside same network. Containers then should talk to each other using using dns(container’s name is automatically assigned as its dns name) rather than ip address because we cant rely on ip addresses in such a dynamic environment which docker provides.
 
 ### Lifecycle
 
@@ -319,17 +299,7 @@ Also see the [mailing list](https://groups.google.com/a/dockerproject.org/forum/
 
 ## Dockerfile
 
-[The configuration file](https://docs.docker.com/engine/reference/builder/). Sets up a Docker container when you run `docker build` on it. Vastly preferable to `docker commit`.  
-
-Here are some common text editors and their syntax highlighting modules you could use to create Dockerfiles:
-* If you use [jEdit](http://jedit.org), I've put up a syntax highlighting module for [Dockerfile](https://github.com/wsargent/jedit-docker-mode) you can use.
-* [Sublime Text 2](https://packagecontrol.io/packages/Dockerfile%20Syntax%20Highlighting)
-* [Atom](https://atom.io/packages/language-docker)
-* [Vim](https://github.com/ekalinin/Dockerfile.vim)
-* [Emacs](https://github.com/spotify/dockerfile-mode)
-* [TextMate](https://github.com/docker/docker/tree/master/contrib/syntax/textmate)
-* [VS Code](https://github.com/Microsoft/vscode-docker)
-* Also see [Docker meets the IDE](https://domeide.github.io/)
+[The configuration file](https://docs.docker.com/engine/reference/builder/). Sets up a Docker container when you run `docker build` on it. Vastly preferable to `docker commit`.  When building dockerfile remember to keep most frequently changing stuff(like application code) in bottom and least changing stuff at the top, so if you make change to your code docker wont rebuild the whole image and execute only the commands from dockerfile which got affected by that change. Dockerfile contains different types of commands(stanzas) like COPY, FROM, WORKDIR, RUN, ENV, EXPOSE etc.
 
 ### Instructions
 
@@ -366,9 +336,12 @@ Here are some common text editors and their syntax highlighting modules you coul
 * [Managing Container Configuration with Metadata](https://speakerdeck.com/garethr/managing-container-configuration-with-metadata)
 * [How to write excellent Dockerfiles](https://rock-it.pl/how-to-write-excellent-dockerfiles/)
 
+## Multiple containers on same dns name
+We can make two or more container  respond to same dns name. This enables us to set two container listening for traffic on same dns name. This is how google, facebook ip addresses are resolved to different servers. But this is all poor load balancing. To do this we use  “--net-alias” option. This option make the container to respond to additional dns name as defined by you in addition with its container name which is its default dns name.
+
 ## Layers
 
-The versioned filesystem in Docker is based on layers. They're like [git commits or changesets for filesystems](https://docs.docker.com/engine/userguide/storagedriver/imagesandcontainers/).
+The versioned filesystem in Docker is based on layers. They're like [git commits or changesets for filesystems](https://docs.docker.com/engine/userguide/storagedriver/imagesandcontainers/).Images are stacked up in layers. Image may have many tags. Images are maintained by docker in a fashion similar to how git store source code. Ex if you have image of ubuntu and then you install apt package on that image then that package is just a layer on base image of ubuntu.
 
 ## Links
 
@@ -491,7 +464,10 @@ This is where general Docker best practices and war stories go:
 
 ## Docker-Compose
 
-Compose is a tool for defining and running multi-container Docker applications. With Compose, you use a YAML file to configure your application’s services. Then, with a single command, you create and start all the services from your configuration. To learn more about all the features of Compose, see the [list of features](https://docs.docker.com/compose/overview/#features).
+Compose is a tool for defining and running multi-container Docker applications. With Compose, you use a YAML file to configure your application’s services. Then, with a single command, you create and start all the services from your configuration. To learn more about all the features of Compose, see the [list of features](https://docs.docker.com/compose/overview/#features).Compose  has two parts: 
+          1. yaml file used to define container with relation to each other.
+          2. cli tool docker compose , used for local dev and testing.
+We can use docker compose cli for local dev and testing but should not be used for production.We can also use docker compose for defining complex custom complex image builds. So we don’t have to define all configs again and again when using that image.
 
 By using the following command you can start up your application:
 
@@ -505,7 +481,33 @@ You can also run docker-compose in detached mode using -d flag, then you can sto
 docker-compose stop
 ```
 
+```
+docker-compose up  # setup volumes , networks and start all containers.
+```
+
+```
+docker-compose down # destroy volumes,networks and containers.
+```
+
+
+   
+
 You can bring everything down, removing the containers entirely, with the down command. Pass `--volumes` to also remove the data volume.
+
+## Docker swarm
+It’s a built-in container orchestration tool.
+    * you start some nodes. you initialize swarm on one of those nodes.
+    * Then you interconnect it with other nodes by address publishing(this add the node as worker) or by using manager token(this add new node as manager). You can update the role of a node only from a manager node. And now your swarm contains all of those interconnected nodes.
+    * Once your nodes are interconnected you can start services on that swarm. docker service is alternative of run command of docker in case of swarm. You start some service inside a swarm specifying the no of replicas you want and swarm manager automatically start these many containers and spread them across the swarm nodes. if some container goes down , swarm feature would put  a new container on that node.
+
+## Overlay network
+it provides container to container traffic in a swarm without interconnecting them explicitly. You just create a overlay network and add nodes of a swarm to that network.
+Docker stack
+it uses a yml file to create a services on a swarm of nodes. The main command we use inside yml file is ‘deploy’ , this command is for swarms. Local machine simply ignores them. On the other hand docker stack compose file ignores build command. If you want to make changes to some service,like no of replicas, you just edit compose file and redeploy it using docker stack.
+
+## Docker secret 
+it is swarm only thing, not for local machine. It is used to keep secret like ssh keys in the swarm to provide interconnectivity between nodes.
+
 
 ## Security
 
