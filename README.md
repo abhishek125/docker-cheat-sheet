@@ -710,7 +710,7 @@ docker rm -v $(docker ps -a -q -f status=exited)
 ```
 
 ### Delete containers after stopping
-    * To delete a container it must be stopped first.
+    To delete a container it must be stopped first.
 
 ```
 docker stop $(docker ps -aq) && docker rm -v $(docker ps -aq)
